@@ -1,0 +1,13 @@
+../dut_src/design.sv
+../tb_src/I2C_seq_item.sv
+../tb_src/Interface.sv
+../tb_src/Sequencer.sv
+../tb_src/Driver.sv
+../tb_src/Monitor.sv
+../tb_src/Agent.sv
+../tb_src/Scoreboard.sv
+../tb_src/Environment.sv
+../tb_src/Sequence.sv
+../tb_src/I2C_Test.sv
+../tb_src/Top.sv
+
