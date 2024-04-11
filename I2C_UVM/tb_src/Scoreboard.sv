@@ -1,19 +1,12 @@
-
-
 class Scoreboard  extends uvm_scoreboard;
-
   `uvm_component_utils(Scoreboard)
   
   uvm_analysis_imp #(I2C_seq_item,Scoreboard) Scoreboard_port;
-  
   I2C_seq_item items_fifo[$];
   
   function new(string name = "Scoreboard" ,uvm_component parent);
-   
     super.new(name,parent);
-  
     `uvm_info(get_type_name(),"Inside constructor of Scoreboard Class",UVM_LOW)
-     
   endfunction :new
    
   function void build_phase(uvm_phase phase);
@@ -43,13 +36,10 @@ class Scoreboard  extends uvm_scoreboard;
   endfunction: write
   
   task compare (I2C_seq_item  item); 
-    //repeat (2)
        if(item.data_in != item.data_out)
 		     `uvm_error(get_type_name(),$sformatf("the test failed as the sent data = %b while the received = %b",item.data_in,item.data_out))
         else
           `uvm_info(get_type_name(),$sformatf("DATA MATCHED --- sent data = %d, received = %d",item.data_in,item.data_out),UVM_MEDIUM)
-          #7500
-          $finish();
   endtask: compare
   
 endclass :Scoreboard

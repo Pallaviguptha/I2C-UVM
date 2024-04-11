@@ -14,26 +14,12 @@ class I2C_seq_item extends uvm_sequence_item;
 		 logic ACK;
 		 logic SCL;
 		 logic SDA;
-
-  
-  
-  
-  
-  //constraint c1 { cmd inside {[0:4]}; }
-  
-// constraint c2 { dvsr==3; }
-
- 
-  
+  constraint c1 { cmd inside {[0:4]}; }
+ constraint c2 { dvsr==3; }
   
   function new(string name = "I2C_seq_item");
-  
-  
     super.new(name);
-  
     `uvm_info(get_type_name(),"Inside constructor of I2C seq item Class",UVM_HIGH)
-  
-  
   endfunction :new
   
   
