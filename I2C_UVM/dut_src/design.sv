@@ -20,9 +20,7 @@ module I2C_Master#(
 						                 );
   typedef enum {idle, hold, start1, start2, data1, data2, data3, data4, 
       data_end, restart, stop1, stop2   } State_Type;
-
 State_Type State_reg, State_next;
-
 logic[8:0] TX_reg, TX_next; // 8 bit data + ack bit
 logic[8:0] RX_reg, RX_next; // 8 bit data + ack bit
 logic[2:0] CMD_reg, CMD_next;
@@ -32,14 +30,11 @@ logic[15:0] Quarter, Half; //quarter cycle counts,half cycle counts
 logic sda_t,sda_reg,scl_t,scl_reg,data_proc;
 logic link,NACK; //write into bus , negative acknowledgement
 logic done_tick_reg,done_tick_next, ready_t; 
-	
 // SCL and SDA are pulled up resistors so the high by default
 assign SCL = scl_reg ? 1'b1 : 1'b0 ;  // master is the only device that drives clock signal
-	
 /*	if master read and the num bits less than 8 
    or write and the current bit is the 8th
    then connect the sda line to the master */
-	
 assign link = (data_proc && CMD_reg==Write_CMD && NumBits_reg==8) || 
                     (data_proc && CMD_reg==Read_CMD && NumBits_reg<8);
 assign SDA = (link || sda_reg) ? 1'b1 : 1'b0 ;
@@ -49,19 +44,14 @@ always_ff@(posedge clk, posedge reset) begin
    if(reset) begin 
 	    scl_reg <= 1;
 		 sda_reg <= 1;
-
 	      end
 	else begin 
 	    scl_reg <= scl_t;
 		 sda_reg <= sda_t;
 	      end
-
 end
-
 always_ff@(posedge clk, posedge reset) begin 
-
  if(reset) begin 
-	
 	    State_reg = idle;
 	    TX_reg <= 0;
             RX_reg <= 0;
@@ -69,7 +59,6 @@ always_ff@(posedge clk, posedge reset) begin
             Count_reg <= 0; 
 	    NumBits_reg <= 0;       
 	    done_tick_reg <= 0;
-	   
 	      end
 	else begin 
 	   State_reg = State_next;
@@ -79,12 +68,10 @@ always_ff@(posedge clk, posedge reset) begin
            Count_reg <= Count_next; 
            NumBits_reg <= NumBits_next; 
 	   done_tick_reg <= done_tick_next;
-
 	      end
 end
 
 always_comb begin 
-   
       State_next = State_reg;
       TX_next = TX_reg;
       RX_next = RX_reg;
@@ -96,32 +83,25 @@ always_comb begin
       done_tick_next = done_tick_reg;
       ready_t = 1'b0;
       data_proc = 1'b0;
-		
 		 case (State_reg) 
 		    idle: begin 
 				  ready_t = 1'b1;
-			     
 				  if(wr_i2c && cmd==Start_CMD) begin 
-				  
 				     State_next = start1;
 				     Count_next = 0;
-				  
 				  end
 			 end
 		    start1: begin 
 				  sda_t = 1'b0;
 				  if(Count_reg==Half) begin 
-				  
 				     State_next = start2;
 				     Count_next = 0;
-				  
 				  end
 			 end
 		    start2: begin 
 				  sda_t = 1'b0;
 				  scl_t = 1'b0;
 				  if(Count_reg==Quarter) begin 
-				  
 				     State_next = hold;
 				     Count_next = 0;
 				  end
@@ -130,12 +110,9 @@ always_comb begin
 				  ready_t = 1'b1;			         
 				  sda_t = 1'b0;
 				  scl_t = 1'b0;
-			     
 				  if(wr_i2c) begin 
-				  
 				     CMD_next = cmd;
 				     Count_next = 0;
-					  
 					    case(cmd) 
 						   Restart_CMD: begin 
 				                            State_next = restart;
@@ -155,44 +132,34 @@ always_comb begin
 				  sda_t = TX_reg[8];
 				  scl_t = 1'b0;
 			          data_proc = 1'b1;
-				  
 				  if(Count_reg==Quarter) begin 
-				  
 				     State_next = data2;
 				     Count_next = 0;
-				  
 				  end
 			 end
 		    data2: begin 
 				  sda_t = TX_reg[8];
 				  scl_t = 1'b1;    // if we removed it nothing would change as it's pulled up by default
 			          data_proc = 1'b1;
-			     
 				  if(Count_reg==Quarter) begin 
-				  
 				     State_next = data3;
 				     Count_next = 0;
 				     RX_next = { RX_reg[7:0] , SDA } ;
-					  
 				  end
 			 end
 		    data3: begin 
 				  sda_t = TX_reg[8];
 				  scl_t = 1'b1;    // if we removed it nothing would change as it's pulled up by default
 			          data_proc = 1'b1;
-			     
 				  if(Count_reg==Quarter) begin 
-				  
 				     State_next = data4;
 				     Count_next = 0;
-				  
 				  end
 			 end
 		    data4: begin 
 				  sda_t = TX_reg[8];
 				  scl_t = 1'b0;    
 			          data_proc = 1'b1;
-			     
 				  if(Count_reg==Quarter) begin 
 				     Count_next = 0;
 				     if(NumBits_reg==8) begin 
@@ -209,18 +176,14 @@ always_comb begin
 		    data_end: begin 
 				  sda_t = 1'b0;
 				  scl_t = 1'b0;    
-			     
 				  if(Count_reg==Quarter) begin 
-				     
 				     done_tick_next= 1'b0;
 				     State_next = hold;
 				     Count_next = 0;
-				  
 				  end
 			 end
 		    restart: begin 
 				  if(Count_reg==Half) begin 
-				  
 				     State_next = start1;
 				     Count_next = 0;
 				  end
@@ -243,23 +206,16 @@ always_comb begin
 		    default: begin 
 	           // equivalent to stop2 state		         
 				  if(Count_reg==Half) begin 
-				  
 				     State_next = idle;
 				     Count_next = 0;
-				  
 				  end
 			 end
 	   endcase		 
 end
 	
 assign  data_out = RX_reg[8:1];
-	
 assign  ACK = RX_reg[0];
-	
 assign  NACK = data_in[0];
-	
 assign  done_tick = done_tick_reg;	
-	
 assign  ready = ready_t;	
-								
 endmodule 			
